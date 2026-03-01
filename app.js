@@ -11,7 +11,7 @@ const errorsController = require("./controllers/errors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const mongoose = require("mongoose");
-
+const fs = require("fs");  // ✅ YEH ADD KARO
 const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -60,14 +60,24 @@ mongoose
       return result;
     }
 
-    const storage = multer.diskStorage({
-      destination: (req, file, cb)=>{
-        cb(null, "uploads/");
-      },
-      filename: (req, file, cb)=>{
-        cb(null, randomString(10) + '-' + file.originalname);
-      }
-    });
+    // Railway volume path
+const UPLOAD_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+
+// Ensure upload directory exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  console.log("✅ Uploads directory created at:", UPLOAD_DIR);
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOAD_DIR);  // ✅ Railway volume path use karo
+  },
+  filename: (req, file, cb) => {
+    cb(null, randomString(10) + '-' + file.originalname);
+  }
+});
+
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpg" ||
@@ -89,6 +99,7 @@ const fileFilter = (req, file, cb) => {
     app.use(express.static(path.join(rootDir, "public")));
     app.use('/uploads', express.static(path.join(rootDir, "uploads")));
     app.use('/host/uploads', express.static(path.join(rootDir, "uploads")));
+    app.use('/uploads', express.static(UPLOAD_DIR));
     app.use(express.urlencoded({ extended: true }));
     app.use(
   multer(multerOptions).fields([
