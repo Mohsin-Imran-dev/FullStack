@@ -1,7 +1,6 @@
 
 const Home = require("../Models/home");
 const fs = require("fs");
-const path = require("path");  // ✅ YEH ADD KARO
 
 exports.getAddHome = (req, res, next) => {
   res.render("host/edit-home", {
@@ -23,46 +22,19 @@ exports.addHostHome = (req, res, next) => {
   });
 };
 
-const UPLOAD_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '../uploads');
-
-// Ensure upload directory exists
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-
-// Helper function to save file to correct location
-const saveUploadedFile = (file) => {
-  if (!file) return "";
-  
-  // Railway volume path
-  const uploadDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '../uploads');
-  
-  // Unique filename generate karo
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-  const filename = uniqueSuffix + '-' + file.originalname;
-  const filepath = path.join(uploadDir, filename);
-  
-  // File ko move karo temporary se permanent location par
-  fs.renameSync(file.path, filepath);
-  
-  // Sirf filename return karo, full path nahi
-  return filename;
-};
-
 exports.postAddHome = (req, res, next) => {
   const { houseName, price, location, rating, description } = req.body;
 
-  // ✅ YEH CHANGE KARO - Sirf filename save karo
-  const photo = req.files?.photo ? saveUploadedFile(req.files.photo[0]) : "";
-  const pdf = req.files?.pdf ? saveUploadedFile(req.files.pdf[0]) : "";
+  const photo = req.files?.photo ? req.files.photo[0].path : "";
+  const pdf = req.files?.pdf ? req.files.pdf[0].path : "";
 
   const home = new Home({
     houseName,
     price,
     location,
     rating,
-    photo,  // Ab sirf filename store hoga, e.g., "123456789-file.jpg"
-    pdf,    // Sirf filename
+    photo,
+    pdf,
     description,
     userId: req.session.user._id,
   });
@@ -71,6 +43,7 @@ exports.postAddHome = (req, res, next) => {
     .then(() => res.redirect("/host/host-home-list"))
     .catch(err => console.log(err));
 };
+
 
 exports.getEditHome = (req, res, next) => {
   const homeId = req.params.homeId;
@@ -100,34 +73,20 @@ exports.postEditHome = (req, res, next) => {
       home.rating = rating;
       home.description = description;
 
-      // ✅ YEH CHANGE KARO
       if (req.files?.photo) {
-        // Purani file delete karo agar exist kare
-        if (home.photo) {
-          const oldPhotoPath = path.join(UPLOAD_DIR, home.photo);
-          if (fs.existsSync(oldPhotoPath)) {
-            fs.unlinkSync(oldPhotoPath);
-          }
-        }
-        // Naya photo save karo aur sirf filename store karo
-        home.photo = saveUploadedFile(req.files.photo[0]);
+        if (home.photo) fs.unlink(home.photo, () => { });
+        home.photo = req.files.photo[0].path;
       }
 
       if (req.files?.pdf) {
-        // Purani file delete karo
-        if (home.pdf) {
-          const oldPdfPath = path.join(UPLOAD_DIR, home.pdf);
-          if (fs.existsSync(oldPdfPath)) {
-            fs.unlinkSync(oldPdfPath);
-          }
-        }
-        // Naya pdf save karo
-        home.pdf = saveUploadedFile(req.files.pdf[0]);
+        if (home.pdf) fs.unlink(home.pdf, () => { });
+        home.pdf = req.files.pdf[0].path;
       }
 
       return home.save();
     })
     .then(() => {
+
       res.redirect("/host/host-home-list");
     })
     .catch((err) => {
@@ -138,29 +97,7 @@ exports.postEditHome = (req, res, next) => {
 
 exports.postDeleteHome = (req, res, next) => {
   const homeId = req.params.homeId;
-  
-  // Pehle home find karo files delete karne ke liye
-  Home.findById(homeId)
-    .then(home => {
-      if (home) {
-        // Photo delete karo
-        if (home.photo) {
-          const photoPath = path.join(UPLOAD_DIR, home.photo);
-          if (fs.existsSync(photoPath)) {
-            fs.unlinkSync(photoPath);
-          }
-        }
-        // PDF delete karo
-        if (home.pdf) {
-          const pdfPath = path.join(UPLOAD_DIR, home.pdf);
-          if (fs.existsSync(pdfPath)) {
-            fs.unlinkSync(pdfPath);
-          }
-        }
-      }
-      // Phir home delete karo
-      return Home.findByIdAndDelete(homeId);
-    })
+  Home.findByIdAndDelete(homeId)
     .then(() => {
       res.redirect("/host/host-home-list");
     })
@@ -168,6 +105,7 @@ exports.postDeleteHome = (req, res, next) => {
       console.log("Error deleting home:", error);
     });
 };
+
 // hostController.js mein ye function add karo
 // hostController.js mein getHostBookings function update karo
 
