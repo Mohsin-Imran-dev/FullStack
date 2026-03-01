@@ -8,6 +8,6 @@
     "healthcheckPath": "/health",
     "healthcheckTimeout": 5,
     "restartPolicyType": "ON_FAILURE",
-    "port": 3001
+    "port": 8080
   }
 }
