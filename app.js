@@ -68,6 +68,9 @@ mongoose
         cb(null, randomString(10) + '-' + file.originalname);
       }
     });
+    // app.js mein multer storage ke baad yeh console log add karo
+const UPLOAD_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'uploads');
+console.log("📁 Upload directory:", UPLOAD_DIR);  // ✅ DEBUG - Railway pe yeh check karo
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpg" ||
