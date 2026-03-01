@@ -1,15 +1,28 @@
 const Home = require("../Models/home");
 const User = require("../Models/user");
-
-exports.addIndex = (req, res, next) => {
-  Home.find().then((registeredHome) => {
+const Booking = require("../Models/booking");
+const path = require('path');
+const rootDir = require("../utils/pathUtil");
+exports.addIndex = async (req, res, next) => {
+  try {
+    const registeredHome = await Home.find();
+    
+    // Sabhi booked homes ki IDs nikaalo (kisi bhi user ne book kiye hoon)
+    const Booking = require("../Models/booking");
+    const allBookings = await Booking.find().select('homeId');
+    const bookedHomeIds = allBookings.map(b => b.homeId.toString());
+    
     res.render("store/index", {
       registeredHome: registeredHome,
+      bookedHomeIds: bookedHomeIds,  // ✅ Ab globally booked homes
       pageTitle: "airbnd Home",
       pageName: "index",
       isLoggedIn: req.isLoggedIn,
     });
-  });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 };
 
 exports.addHome = (req, res, next) => {
@@ -23,13 +36,6 @@ exports.addHome = (req, res, next) => {
   });
 };
 
-exports.getBookings = (req, res, next) => {
-  res.render("store/bookings", {
-    pageTitle: "My Bookings",
-    pageName: "bookings",
-    isLoggedIn: req.isLoggedIn,
-  });
-};
 
 // ✅ SIRF YEH FUNCTION CHANGE KARO - user check add karo
 exports.getFavoriteList = async (req, res, next) => {
@@ -37,7 +43,7 @@ exports.getFavoriteList = async (req, res, next) => {
   if (!req.session || !req.session.user || !req.session.user._id) {
     return res.redirect("/login");
   }
-  
+
   const userId = req.session.user._id;
   const user = await User.findById(userId).populate("favourites");
   res.render("store/favorite-list", {
@@ -54,7 +60,7 @@ exports.postAddToFavorites = async (req, res, next) => {
   if (!req.session || !req.session.user || !req.session.user._id) {
     return res.redirect("/login");
   }
-  
+
   const homeId = req.body.id.toString();
   const userId = req.session.user._id;
   const user = await User.findById(userId);
@@ -71,12 +77,12 @@ exports.postRemoveFromFavorites = async (req, res, next) => {
   if (!req.session || !req.session.user || !req.session.user._id) {
     return res.redirect("/login");
   }
-  
+
   const homeId = req.params.homeId;
   const userId = req.session.user._id;
   const user = await User.findById(userId);
   if (user.favourites.includes(homeId)) {
-    user.favourites = user.favourites.filter(fav => fav != homeId);
+    user.favourites = user.favourites.filter((fav) => fav != homeId);
     await user.save();
   }
   res.redirect("/favourites");
@@ -88,7 +94,6 @@ exports.getHomeDetails = (req, res, next) => {
     if (!home) {
       res.redirect("/");
     } else {
-      console.log("You requested details for home ID:", homeId);
       res.render("store/home-detail", {
         home: home,
         pageTitle: "Home Detail",
@@ -97,4 +102,106 @@ exports.getHomeDetails = (req, res, next) => {
       });
     }
   });
+};
+
+exports.getHouseRules = [
+  (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+      return res.redirect("/login");
+    }
+    next();
+  },
+
+  async (req, res, next) => {
+    const homeId = req.params.homeId;
+    const home = await Home.findById(homeId);
+    if (!home || !home.pdf) {
+      return res.redirect("/");
+    }
+
+    res.download(home.pdf);
+  },
+];
+
+
+// GET request - Booking form show karo
+exports.getConfirmBooking = async (req, res, next) => {
+  try {
+    if (!req.session.isLoggedIn) {
+      return res.redirect("/login");
+    }
+    
+    const homeId = req.params.homeId;
+    const home = await Home.findById(homeId);
+    
+    if (!home) {
+      return res.redirect("/");
+    }
+    
+    res.render("store/confirm-booking", {
+      home: home,
+      pageTitle: "Confirm Booking",
+      pageName: "Confirm Booking",
+      isLoggedIn: req.isLoggedIn,
+    });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
+};
+
+// POST request - Actual booking save karo
+exports.postConfirmBooking = async (req, res, next) => {
+  try {
+    if (!req.session.isLoggedIn) {
+      return res.redirect("/login");
+    }
+
+    console.log("Request Body:", req.body);
+
+    const homeId = req.params.homeId;
+    const { checkIn, checkOut, guests } = req.body;
+    
+    if (!checkIn || !checkOut || !guests) {
+      console.log("Missing fields:", { checkIn, checkOut, guests });
+      return res.redirect(`/confirm-booking/${homeId}`);
+    }
+
+    const userId = req.session.user._id;
+    const user = await User.findById(userId);
+    const home = await Home.findById(homeId);
+
+    if (!home || !user) {
+      return res.redirect("/");
+    }
+
+    // Calculate total price
+    const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
+    const totalPrice = home.price * nights;
+
+    // ✅ YEH LINE HATA DO - upar already require kar liya
+    // const Booking = require("../Models/booking");
+    
+    const userName = user.firstName || user.email || "Guest";
+    const userEmail = user.email || "No email";
+
+    const booking = new Booking({
+      homeId: home._id,
+      userId: user._id,
+      userName: userName,
+      userEmail: userEmail,
+      checkIn,
+      checkOut,
+      guests: parseInt(guests),
+      totalPrice,
+    });
+
+    await booking.save();
+    console.log("Booking saved successfully!");
+    
+    res.redirect("/host/bookings");
+  } catch (err) {
+    console.log("Error confirming booking:", err);
+    res.redirect("/");
+  }
 };

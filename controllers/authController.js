@@ -55,7 +55,6 @@ exports.postLogin = async (req, res, next) => {
         console.log("Session save error:", err);
         return res.redirect("/login");
       }
-      console.log("✅ Session saved for user:", user.email);
       res.redirect("/");
     });
     

@@ -1,13 +1,15 @@
 const express = require("express");
 const hostController = require("../controllers/hostController");
-const storeController = require("../controllers/storeController");
+const auth = require("../middleware/auth");  // ✅ Import middleware
 const hostRouter = express.Router();
-hostRouter.get("/add-home", hostController.getAddHome);
 
-hostRouter.post("/add-home", hostController.postAddHome);
-hostRouter.get("/bookings", storeController.getBookings);
-hostRouter.get("/host-home-list", hostController.addHostHome);
-hostRouter.get("/edit-home/:homeId", hostController.getEditHome);
-hostRouter.post("/edit-home", hostController.postEditHome);
-hostRouter.post("/delete-home/:homeId", hostController.postDeleteHome);
+// Host routes - sirf host access kar sake
+hostRouter.get("/add-home", auth.isHost, hostController.getAddHome);
+hostRouter.post("/add-home", auth.isHost, hostController.postAddHome);
+hostRouter.get("/bookings", auth.isHost, hostController.getHostBookings);
+hostRouter.get("/host-home-list", auth.isHost, hostController.addHostHome);
+hostRouter.get("/edit-home/:homeId", auth.isHost, hostController.getEditHome);
+hostRouter.post("/edit-home", auth.isHost, hostController.postEditHome);
+hostRouter.post("/delete-home/:homeId", auth.isHost, hostController.postDeleteHome);
+
 module.exports = hostRouter;

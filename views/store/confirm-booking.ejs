@@ -1,0 +1,566 @@
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: #11121A;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #ffffff;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    main {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    /* Booking Card */
+    .booking-card {
+        background: linear-gradient(145deg, #1A1B26, #151620);
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Image Section */
+    .image-section {
+        position: relative;
+        height: 280px;
+        overflow: hidden;
+    }
+
+    .image-section::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 150px;
+        background: linear-gradient(to top, #151620, transparent);
+        pointer-events: none;
+    }
+
+    .home-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .booking-card:hover .home-image {
+        transform: scale(1.05);
+    }
+
+    /* Image Overlay Badge */
+    .image-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 1.5rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 10;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .image-badge i {
+        color: #FFD700;
+        margin-right: 0.5rem;
+    }
+
+    .image-badge span {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Content Section */
+    .content-section {
+        padding: 2rem;
+        position: relative;
+    }
+
+    /* Home Title */
+    .home-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ffffff 0%, #A5B4FC 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.5px;
+    }
+
+    .location {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #8F95B2;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .location i {
+        color: #A5B4FC;
+        font-size: 1.2rem;
+    }
+
+    /* Price Card */
+    .price-card {
+        background: linear-gradient(145deg, rgba(165, 180, 252, 0.1), rgba(255, 255, 255, 0.02));
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(165, 180, 252, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            border-color: rgba(165, 180, 252, 0.2);
+        }
+        50% {
+            border-color: rgba(165, 180, 252, 0.5);
+        }
+    }
+
+    .price-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #8F95B2;
+        font-size: 1.1rem;
+    }
+
+    .price-label i {
+        color: #A5B4FC;
+        font-size: 1.3rem;
+    }
+
+    .price-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #A5B4FC;
+        letter-spacing: -0.5px;
+        text-shadow: 0 0 20px rgba(165, 180, 252, 0.3);
+    }
+
+    /* Form Section */
+    .form-section {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 24px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-title i {
+        color: #A5B4FC;
+        font-size: 1.3rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #8F95B2;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+        color: #A5B4FC;
+        font-size: 1rem;
+    }
+
+    .form-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 0.875rem 1.25rem;
+        color: #ffffff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .form-input:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(165, 180, 252, 0.3);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #A5B4FC;
+        background: rgba(165, 180, 252, 0.1);
+        box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.2);
+    }
+
+    .form-input option {
+        background: #1A1B26;
+        color: #ffffff;
+    }
+
+    /* Calendar icon customization */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+        cursor: pointer;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+
+    /* Select customization */
+    select.form-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A5B4FC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.2rem;
+    }
+
+    /* Confirm Button */
+    .confirm-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #A5B4FC, #818CF8);
+        border: none;
+        border-radius: 20px;
+        padding: 1.25rem;
+        color: #11121A;
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 1.5rem;
+    }
+
+    .confirm-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .confirm-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 30px -10px rgba(129, 140, 248, 0.4);
+    }
+
+    .confirm-btn:hover::before {
+        left: 100%;
+    }
+
+    .confirm-btn i {
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .confirm-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    .confirm-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Features List */
+    .features-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 100px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #8F95B2;
+        font-size: 0.9rem;
+    }
+
+    .feature-item i {
+        color: #A5B4FC;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 640px) {
+        main {
+            margin: 1rem auto;
+        }
+
+        .image-section {
+            height: 200px;
+        }
+
+        .content-section {
+            padding: 1.5rem;
+        }
+
+        .home-title {
+            font-size: 1.8rem;
+        }
+
+        .price-value {
+            font-size: 1.8rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .image-badge {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .confirm-btn {
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Tooltip for dates */
+    .date-hint {
+        font-size: 0.8rem;
+        color: #8F95B2;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .date-hint i {
+        color: #A5B4FC;
+        font-size: 0.7rem;
+    }
+
+    /* Loading state for button */
+    .confirm-btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .confirm-btn.loading i {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+</head>
+
+<body>
+  <%- include('../partials/nav') %>
+  
+  <main>
+    <div class="booking-card">
+      <!-- Image Section -->
+      <div class="image-section">
+        <img src="/<%= home.photo %>" alt="<%= home.houseName %>" class="home-image">
+        <div class="image-badge">
+          <i class="fas fa-star"></i>
+          <span>Featured Home</span>
+        </div>
+      </div>
+      
+      <!-- Content Section -->
+      <div class="content-section">
+        <h1 class="home-title">
+          <i class="fas fa-home" style="background: none; -webkit-text-fill-color: #A5B4FC; margin-right: 0.5rem;"></i>
+          <%= home.houseName %>
+        </h1>
+        
+        <div class="location">
+          <i class="fas fa-map-marker-alt"></i>
+          <span><%= home.location %></span>
+        </div>
+        
+        <!-- Price Card -->
+        <div class="price-card">
+          <div class="price-label">
+            <i class="fas fa-tag"></i>
+            <span>Price per night</span>
+          </div>
+          <div class="price-value">Rs. <%= home.price %></div>
+        </div>
+        
+        <!-- Booking Form -->
+        <form action="/confirm-booking/<%= home._id %>" method="POST" class="form-section">
+          <div class="form-title">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Booking Details</span>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-calendar-check"></i>
+                Check-in Date
+              </label>
+              <input type="date" name="checkIn" required 
+                min="<%= new Date().toISOString().split('T')[0] %>"
+                class="form-input"
+                value="<%= new Date().toISOString().split('T')[0] %>">
+              <div class="date-hint">
+                <i class="fas fa-info-circle"></i>
+                <span>Select your arrival date</span>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-calendar-times"></i>
+                Check-out Date
+              </label>
+              <input type="date" name="checkOut" required 
+                min="<%= new Date().toISOString().split('T')[0] %>"
+                class="form-input">
+              <div class="date-hint">
+                <i class="fas fa-info-circle"></i>
+                <span>Select your departure date</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-users"></i>
+              Number of Guests
+            </label>
+            <select name="guests" required class="form-input">
+              <option value="1">1 Guest</option>
+              <option value="2" selected>2 Guests</option>
+              <option value="3">3 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="5">5+ Guests (Contact host)</option>
+            </select>
+          </div>
+          
+          <!-- Features/Hints -->
+          <div class="features-list">
+            <div class="feature-item">
+              <i class="fas fa-wifi"></i>
+              <span>Free WiFi</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-parking"></i>
+              <span>Parking</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-utensils"></i>
+              <span>Kitchen</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-snowflake"></i>
+              <span>AC</span>
+            </div>
+          </div>
+          
+          <button type="submit" class="confirm-btn" onclick="this.classList.add('loading')">
+            <span>Confirm Booking</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Add loading state to button on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const btn = this.querySelector('.confirm-btn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<span>Processing...</span><i class="fas fa-spinner"></i>';
+    });
+
+    // Set minimum check-out date based on check-in
+    const checkIn = document.querySelector('input[name="checkIn"]');
+    const checkOut = document.querySelector('input[name="checkOut"]');
+    
+    checkIn.addEventListener('change', function() {
+      checkOut.min = this.value;
+      if (checkOut.value < this.value) {
+        checkOut.value = this.value;
+      }
+    });
+  </script>
+</body>
+</html>

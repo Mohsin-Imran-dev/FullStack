@@ -8,36 +8,80 @@
         <h1 class="text-3xl text-center ">
           <%= editing ? "Edit Your Home" : "Register your Home" %>
         </h1>
-        <div class="mt-10 md:mt-6 border-2 px-6 py-1 rounded-2xl inline shadow-sm shadow-cyan-950 max-w-md w-90 md:w-[35%]">
-          <form class="flex flex-col w-full p-5" action="/host/<%= editing ? 'edit-home' : 'add-home' %>" method="POST">
+        <div
+          class="mt-10 md:mt-6 border-2 px-6 py-1 rounded-2xl inline shadow-sm shadow-cyan-950 max-w-md w-90 md:w-[35%]">
+          <form class="flex flex-col w-full p-5" enctype="multipart/form-data"
+            action="/host/<%= editing ? 'edit-home' : 'add-home' %>" method="POST">
             <input
               class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
-              type="hidden" name="_id" value="<%= editing? home._id: '' %>" placeholder="Enter name of your house" />
+              type="hidden" name="_id" value="<%= editing? home._id: '' %>" />
+
             <input
               class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
               type="text" name="houseName" value="<%= editing? home.houseName: '' %>"
               placeholder="Enter name of your house" />
+
             <input
               class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
               type="text" name="price" value="<%= editing? home.price: '' %>" placeholder="Price Per Night" />
+
             <input
               class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
               type="text" name="location" value="<%= editing? home.location: '' %>" placeholder="Enter Location" />
+
             <input
               class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
               type="text" value="<%= editing? home.rating: '' %>" name="rating" placeholder="Enter Rating" />
-            <input
-              class="border-b-2 outline-0 border-b-blue-600 pl-2 w-full pt-3 pb-1 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500"
-              type="file" name="photo" value="<%= editing? home.photo: '' %>" placeholder="Enter Photo URL" />
+
+            <!-- File Input -->
+            <div class="relative w-full mt-5">
+              <input type="file" name="photo" id="photo-upload" class="hidden">
+              <label for="photo-upload"
+                class="flex items-center gap-3 px-4 py-3 bg-gray-50 border-2 border-dashed border-cyan-500 rounded-xl cursor-pointer hover:border-cyan-600 hover:bg-gray-100 transition-all duration-300 group">
+                <i
+                  class="fas fa-cloud-upload-alt text-2xl text-cyan-500 group-hover:scale-110 transition-transform"></i>
+                <span class="text-gray-600 text-sm truncate flex-1" id="file-name">
+                  <%= editing && home.photo ? home.photo : 'Choose a photo' %>
+                </span>
+                <span class="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full">Browse</span>
+              </label>
+            </div>
+            <div class="relative w-full mt-5">
+              <input type="file" name="pdf" id="pdf-upload" class="hidden">
+              <label for="pdf-upload"
+                class="flex items-center gap-3 px-4 py-3 bg-gray-50 border-2 border-dashed border-cyan-500 rounded-xl cursor-pointer hover:border-cyan-600 hover:bg-gray-100 transition-all duration-300 group">
+                <i
+                  class="fas fa-cloud-upload-alt text-2xl text-cyan-500 group-hover:scale-110 transition-transform"></i>
+                <span class="text-gray-600 text-sm truncate flex-1" id="pdf-name">
+                  <%= editing && home.pdf ? home.pdf : 'Choose a pdf' %>
+                </span>
+                <span class="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full">Browse</span>
+              </label>
+            </div>
+
+            <!-- Description -->
             <textarea
               class="border-2 outline-0 border-blue-600 pl-2 mt-5 w-full pt-3 pb-3 text-sm md:text-md placeholder:text-sm placeholder:text-gray-500 rounded-md resize-none min-h-24"
               name="description" placeholder="Describe your home"><%= editing? home.description: '' %></textarea>
+
+            <!-- Submit Button -->
             <input type="submit"
               class="self-start border-2 mt-8 rounded-md cursor-pointer h-8 bg-blue-500 text-white hover:bg-blue-600 w-full"
               value="<%= editing ? 'Update Home' : 'Add Home' %>" />
           </form>
         </div>
       </main>
+
+      <script>
+        document.getElementById('photo-upload').addEventListener('change', function (e) {
+          const fileName = e.target.files[0]?.name || 'Choose a photo';
+          document.getElementById('file-name').textContent = fileName;
+        });
+        document.getElementById('pdf-upload').addEventListener('change', function (e) {
+          const fileName = e.target.files[0]?.name || 'Choose a pdf';
+          document.getElementById('pdf-name').textContent = fileName;
+        });
+      </script>
   </body>
 
   </html>
