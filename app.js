@@ -113,7 +113,9 @@ app.use(
     name: 'connect.sid'         
   })
 );
-
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
     // Locals middleware
     app.use((req, res, next) => {
       res.locals.isLoggedIn = req.session.isLoggedIn;
